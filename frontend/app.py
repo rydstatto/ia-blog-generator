@@ -1,11 +1,15 @@
 import streamlit as st
 import os
-from google import genai
+import google.generativeai as genai
 
 st.set_page_config(page_title="AI Blog Generator", layout="wide")
 
 st.title("🤖 Generador Automatizado de Blogs con IA")
 st.write("Crea artículos completos con imágenes optimizadas usando Inteligencia Artificial.")
+
+# Configuración forzada de la clave API para compatibilidad regional
+if "GEMINI_API_KEY" in os.environ:
+    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # Crear pestañas para organizar la app
 tab1, tab2 = st.tabs(["📝 Crear Artículo", "📚 Historial de Blogs"])
@@ -26,13 +30,11 @@ with tab1:
         if topic:
             with st.spinner("Generando artículo con Gemini..."):
                 try:
-                    # Inicializa el cliente usando la API Key de los Secrets de Streamlit
-                    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+                    # Usamos el modelo clásico pro/flash compatible con el backend anterior
+                    model = genai.GenerativeModel('gemini-1.5-flash')
                     
-                    # Llamada directa al modelo oficial actual de Google
-                    response = client.models.generate_content(
-                        model='gemini-2.5-flash',
-                        contents=f"Escribe un artículo de blog extenso, estructurado y optimizado para SEO sobre: '{topic}'. El tono debe ser {tone}."
+                    response = model.generate_content(
+                        f"Escribe un artículo de blog extenso, estructurado y optimizado para SEO sobre: '{topic}'. El tono debe ser {tone}."
                     )
                     
                     st.success("¡Artículo generado con éxito!")
@@ -40,7 +42,7 @@ with tab1:
                     
                 except Exception as e:
                     st.error(f"Hubo un problema al conectar con la IA: {e}")
-                    st.info("Asegúrate de haber configurado tu GEMINI_API_KEY en los Secrets de Streamlit Cloud.")
+                    st.info("Revisa la consola si el error de credenciales persiste.")
         else:
             st.warning("Por favor, ingresa un tema antes de generar.")
 
