@@ -6,4 +6,4 @@ openai
 python-dotenv
 streamlit
 requests
-google-genai
+google-generativeai
